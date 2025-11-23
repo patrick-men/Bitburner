@@ -19,9 +19,10 @@ export async function main(ns) {
     const moneyScriptRAM = ns.getScriptRam("money-print.js");
     const maxInstances = Math.floor((homeMaxRAM - homeUsedRAM) / moneyScriptRAM);
 
+    // This block fills home with money-print.js instances. It's slow-ish due to the sleep, but without the game would crash/freeze and require a reload
     for (let i = 0; i < maxInstances; i++) {
       try { ns.exec("money-print.js", "home", 1, i); } catch { } 
-      await ns.sleep(100); // Slight delay to prevent overload on home
+      await ns.sleep(100); 
     }
 
     // Get neighbors excluding self
@@ -73,7 +74,13 @@ export async function main(ns) {
         try { ns.nuke(target); } catch { }
         await ns.sleep(5000);
       }
+
     
+      // Skip n00dles and go straight to max-hardware once hacking level is sufficient. This is because n00dles doesn't have enough RAM to run the necessary scripts
+      if (target === "n00dles" && ns.getHackingLevel() > 80) { 
+        try {runScriptOnHost(ns, "old-spreader.js", "max-hardware");} catch { }
+        continue;
+      }
 
       // If there isn't enough room to run all scripts, use that host only as a host for spreading
       if (ns.hasRootAccess(target) && maxRAM < allScriptsRAM) {
@@ -83,12 +90,6 @@ export async function main(ns) {
 
       // Ensure that only money-print.js is run on home, since neither grower nor weakener work there
       if (target === "home") { 
-        continue;
-      }
-
-      // Skip n00dles and go straight to max-hardware once hacking level is sufficient. This is because n00dles doesn't have enough RAM to run the necessary scripts
-      if (target === "n00dles" && ns.getHackingLevel() > 80) { 
-        try {runScriptOnHost(ns, "old-spreader.js", "max-hardware");} catch { }
         continue;
       }
 
