@@ -24,7 +24,6 @@ export async function main(ns) {
         await ns.sleep(100); // Slight delay to prevent overload on home
     }
 
-
     // Get neighbors excluding self
     const neighbors = ns.scan().filter(s => s !== host);
     if (neighbors.length === 0) {
@@ -42,6 +41,32 @@ export async function main(ns) {
       const target = randomList[i];
       const maxRAM = ns.getServerMaxRam(target); // Get target's max RAM to verify if money-print can be deployed later on
       const allScriptsRAM = ns.getScriptRam("old-spreader.js", "home") + ns.getScriptRam("weakener.js", "home") + ns.getScriptRam("grower.js", "home")
+
+        // Try to gain root access if not already there
+    if (!ns.hasRootAccess(target)) {
+        if (ns.fileExists("BruteSSH.exe", "home")) {
+            ns.brutessh(target);
+            await ns.sleep(5000);
+        }
+        if (ns.fileExists("FTPCrack.exe", "home")) {
+            ns.ftpcrack(target);
+            await ns.sleep(5000);
+        }
+        if (ns.fileExists("relaySMTP.exe", "home")) {
+            ns.relaysmtp(target);
+            await ns.sleep(5000);
+        }
+        if (ns.fileExists("HTTPWorm.exe", "home")) {
+            ns.httpworm(target);
+            await ns.sleep(5000);
+        }
+        if (ns.fileExists("SQLInject.exe", "home")) {
+            ns.sqlinject(target);
+            await ns.sleep(5000);
+        }
+        try { ns.nuke(target); } catch { }
+        await ns.sleep(5000);
+    }
       
 
       // If there isn't enough room to run all scripts, use that host only as a host for spreading
@@ -52,6 +77,12 @@ export async function main(ns) {
 
       // Ensure that only money-print.js is run on home, since neither grower nor weakener work there
       if (target === "home") { 
+        continue;
+      }
+
+      // Skip n00dles and go straight to max-hardware once hacking level is sufficient. This is because n00dles doesn't have enough RAM to run the necessary scripts
+      if (target === "n00dles" && ns.getHackingLevel() > 80) { 
+        try {runScriptOnHost(ns, "old-spreader.js", "max-hardware");} catch { }
         continue;
       }
 
