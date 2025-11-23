@@ -20,8 +20,8 @@ export async function main(ns) {
     const maxInstances = Math.floor((homeMaxRAM - homeUsedRAM) / moneyScriptRAM);
 
     for (let i = 0; i < maxInstances; i++) {
-        try { ns.exec("money-print.js", "home", 1, i); } catch { } 
-        await ns.sleep(100); // Slight delay to prevent overload on home
+      try { ns.exec("money-print.js", "home", 1, i); } catch { } 
+      await ns.sleep(100); // Slight delay to prevent overload on home
     }
 
     // Get neighbors excluding self
@@ -42,32 +42,38 @@ export async function main(ns) {
       const maxRAM = ns.getServerMaxRam(target); // Get target's max RAM to verify if money-print can be deployed later on
       const allScriptsRAM = ns.getScriptRam("old-spreader.js", "home") + ns.getScriptRam("weakener.js", "home") + ns.getScriptRam("grower.js", "home")
 
-        // Try to gain root access if not already there
-    if (!ns.hasRootAccess(target)) {
+      // Try to gain root access if not already there
+      if (!ns.hasRootAccess(target)) {
+
         if (ns.fileExists("BruteSSH.exe", "home")) {
-            ns.brutessh(target);
-            await ns.sleep(5000);
+          ns.brutessh(target);
+          await ns.sleep(5000);
         }
+
         if (ns.fileExists("FTPCrack.exe", "home")) {
-            ns.ftpcrack(target);
-            await ns.sleep(5000);
-        }
+          ns.ftpcrack(target);
+          await ns.sleep(5000);
+        } 
+
         if (ns.fileExists("relaySMTP.exe", "home")) {
-            ns.relaysmtp(target);
-            await ns.sleep(5000);
+          ns.relaysmtp(target);
+          await ns.sleep(5000);
         }
+
         if (ns.fileExists("HTTPWorm.exe", "home")) {
-            ns.httpworm(target);
-            await ns.sleep(5000);
+          ns.httpworm(target);
+          await ns.sleep(5000);
         }
+
         if (ns.fileExists("SQLInject.exe", "home")) {
-            ns.sqlinject(target);
-            await ns.sleep(5000);
+          ns.sqlinject(target);
+          await ns.sleep(5000);
         }
+
         try { ns.nuke(target); } catch { }
         await ns.sleep(5000);
-    }
-      
+      }
+    
 
       // If there isn't enough room to run all scripts, use that host only as a host for spreading
       if (ns.hasRootAccess(target) && maxRAM < allScriptsRAM) {
